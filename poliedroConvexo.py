@@ -122,6 +122,7 @@ class poliedroConvexo(object):
         self.con_puntos=set()
         self.con_segm=set()
         self.piram=set()
+        
         aux=[]
         auxp=[]        
 
@@ -156,6 +157,7 @@ class poliedroConvexo(object):
                 
 
         self.punto_central=self.punto_central()
+        #print(self.punto_central)
 
         for i in range(len(self.poligonos_convexos)):
             poligono_convexo=self.poligonos_convexos[i]

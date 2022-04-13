@@ -125,7 +125,7 @@ def puntos_circulo(centro, normal, radio, n=10):
     for i in range(n):
         angulo_i=(math.pi*2/n)*i
         
-        lista_puntos.append(centro.mover(v1*math.cos(angulo_i)+v2*math.sin(angulo_i)))
+        lista_puntos.append(copy.deepcopy(centro).mover(v1*math.cos(angulo_i)+v2*math.sin(angulo_i)))
     
     #print(len(lista_puntos))
     return lista_puntos
