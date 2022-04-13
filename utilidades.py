@@ -9,6 +9,7 @@ from decimal import Decimal
 from fractions import Fraction
 import math
 import copy
+import numpy as np
 from vector import vector
 
 
@@ -20,6 +21,44 @@ SMALL_ANGLE=0.1
 ###############################################################################################################
 ############################ Funciones utiles #################################################################
 ###############################################################################################################
+
+def verificaElementosLista(lista):
+    sin_repetir=[]
+    repetidos=[]
+    
+    for elem in lista:
+        
+        if not sin_repetir:
+            sin_repetir.append(elem)
+            
+        else:
+            if not verificaElementoinLista(sin_repetir, elem):#elem not in sin_repetir:
+                sin_repetir.append(elem)
+                
+            else:
+                repetidos.append(elem)
+                
+    
+    for elem in sin_repetir:
+        if sin_repetir.count(elem)>1:
+            print("El filtro no funciono")
+            verificaElementosLista(sin_repetir)
+            
+    return sin_repetir
+
+def verificaElementoinLista(lista, elemento):
+    
+    hashes=[]
+    
+    for i in lista:
+        hashes.append(hash(i))
+    
+    if hash(elemento) in hashes:
+        return True
+    
+    else:
+        return False
+                
 
 def keyValue(dic,valor):
     for i, j in dic.items():
@@ -64,22 +103,30 @@ def geomRenderCaras(poliedro, vertices:dict):
     return caras, vertices
 
 def puntos_circulo(centro, normal, radio, n=10):
+    #print(normal)
     if n<=2:
         raise ValueError("n muy pequeña para construir un un poligono inscrito")
-    if normal.angulo(vector.x_uni())<SMALL_ANGLE:
+    if np.abs(normal.angulo(vector.x_uni()))<SMALL_ANGLE or np.abs(np.cos(normal.angulo(vector.x_uni())))==1:
         vector_base=vector.y_uni()
-        if normal.angulo(vector.y_uni())< SMALL_ANGLE:
+        if np.abs(normal.angulo(vector.y_uni()))< SMALL_ANGLE or np.abs(np.cos(normal.angulo(vector.y_uni())))==1:
             raise ValueError("No deberia poder ser normal a x e y")
     else:
         vector_base=vector.x_uni()
+        
+    #print(vector_base)
     v1=normal.normalizar().pcruz(vector_base).normalizar()
     v2=normal.normalizar().pcruz(v1)
+    #print(v1, v2, "hola")
     v1=v1*radio
     v2=v2*radio
     lista_puntos=[]
+    
     for i in range(n):
         angulo_i=(math.pi*2/n)*i
-        lista_puntos.append(copy.deepcopy(centro).mover(v1*math.cos(angulo_i)+v2*math.sin(angulo_i)))
+        
+        lista_puntos.append(centro.mover(v1*math.cos(angulo_i)+v2*math.sin(angulo_i)))
+    
+    #print(len(lista_puntos))
     return lista_puntos
 
 def area_triangulo(pa,pb,pc):

@@ -1,0 +1,86 @@
+c   **********************************************************                  
+    1     1 -0.001205 -1 #3 #5 #4 #6 #7 #8 #9 #10 #11 #12  $ Recinto
+    2     0         1  $ Mundo exterior
+    3     6    -2.7 (-3 4 #4 #7 #11 ):(-5 6 )#9  $4   -5.05 vidrio emplomado
+    4     0         (-4 :-6 )#6 #7  $interior del vidrio
+    5     1 -0.001205 (2 -8 #10 )#8  $recubrimiento de plomo
+    6     2  -19.35 (-7 :-14 ) $tungsteno
+    7     6    -2.7 -9 -3 12 -10  $apertura de al 6    -2.7 vidrio
+    8     1 -0.001205 -11 13 -8 -10  $filtro endurecedor 7    -9.8 recubrimiento
+    9     1 -0.001205 -2 3 5  $espacio entre estructura de plomo y vidrio
+   10     1 -0.001205 -11 -13 2 -10 
+   11     1 -0.001205 -9 4 -12 
+   12     1 -0.001205 -15 8  $ #5 #6 #7 #8 #9 #10 #11 #3 #4
+
+c *************************************************************                 
+c *                        SUPERFICIES                         *                
+c * Geom       Size    $ Comentarios                           *                
+c **************************************************************                
+    1       rpp -75 75 -75 75 -75 75 
+    2       rcc 16 0 15 -14.6 0 0 7 
+    8       rcc 16.2 0 15 -15 0 0 7.1 
+   13       rcc 16.2 0 15 -15 0 0 7.084 
+    3       rcc 15 0 15 -7.5 0 0 6.4 
+   12       rcc 15 0 15 -7.5 0 0 6.1 
+    4       rcc 14.7 0 15 -6.9 0 0 6.1 
+    5       rcc 7.5 0 15 -4 0 0 5 
+    6       rcc 7.8 0 15 -4 0 0 4.7 
+    7       trc 11.5 0 15 1 0 0 2 4 
+    9       c/z 11.4 0 1.2 
+   10        pz 15 
+   11       c/z 11.4 0 1.4 
+   14       rcc 12.5 0 15 1 0 0 4 
+   15         s 8.5 0 15 15 
+
+mode  p e
+c **************************************************************                
+c *                         MATERIALES                         *                
+c * ---------------------------------------------------------- *                
+c * Mat.  ZAID  Density (>0, At. Fracc.; <0, Weigth fracc.)    *                
+c *  #      /      |         Comments                          *                
+c **************************************************************                
+m1    8016.         -0.231781  $ Air           Oxygen
+      7014.         -0.755268 6000.         -0.000124 
+m2    74183.84               -1 
+m3    29064.               -1 
+m4    14028.           -0.295 
+      8016.            -0.295 82207.        -0.242543 8016.         -0.037457 
+      11023.        -0.096447 8016.          -0.03354 
+m5    82207.               -1 
+m6    13027.               -1 
+m7    83209.               -1 
+imp:p   10           0            1 8r         10            $ 1, 12
+imp:e   4            0            1 9r          $ 1, 12
+c **************************************************************                
+c *                       Termino fuente                       *                
+c **************************************************************                
+c  Fuente direccional de wolframio                                              
+c sdef pos=8 0 12.5 axs=1 0 0 rad=d1 erg=0.17 par=3 vec=4 0 0 dir=1               
+c si1  0 1                                                                        
+c sp1  -21 0                                                                      
+c sdef X=d1 Y=0 Z=d3 ERG=0.13 PAR=3                                             
+c si1 9.5 10.5 $ x-range limits for source volume                               
+c sp1 0 1 $ uniform probability over x-range                                    
+c si3 10.5 11.5 $ z-range limits for source volume                              
+c sp3 0 1 $ uniform probability over z-range                                    
+c --- Line monoenergetic photon source lying along x-axis                       
+c This uses a degenerate Cartesian volumetric source.                           
+c                                                                               
+sdef POS=10.2 0 11.5 AXS=1 0 4 EXT=0 RAD=d1 PAR=3 ERG=0.13 vec=4 0 1 DIR=1   
+si1 0 1.5 $ radial sampling range: 0 to Rmax (=1.5cm)                          
+sp1 -21 1 $ radial sampling weighting: r^1 for disk                           
+c                                                                               
+c                                                                               
+c ******************************************************                        
+c *                     Tallies                        *                        
+c ******************************************************                        
+c Tally 5: Detectores puntuales a varias distancias                             
+c Calculo de la fluencia total de fotones                                       
+c  fc5 Calculo de la fluencia total de fotones/por foton emitido                
+f5:p 10 0 0 5 $detector puntual                                                 
+e5 1e-3 200i 0.13                                                              
+f2:p 15 $detector puntual                                                       
+e2 1e-3 200i 0.13                                                              
+c f4:e 3                                                             
+nps  50e6                                                                       
+prdmp 1e5  1e4  0  1                                                            

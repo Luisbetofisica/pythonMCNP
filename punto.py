@@ -27,7 +27,7 @@ class punto(object):
         return cls(0,0,0)
 
     def __repr__(self):   #representación en el print
-        return "Punto({},{},{})".format(self.x,self.y,self.z)
+        return "Punto({:0.2f},{:0.2f},{:0.2f})".format(self.x,self.y,self.z)
 
     def __eq__(self, vecb): #comparación con otro punto
         return(self.x == vecb.x and self.y == vecb.y and self.z == vecb.z)

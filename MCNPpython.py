@@ -30,7 +30,7 @@ def verificarFloatLista(lista,inicio=0,fin=-1):
             except:
                 return lista.index(lista[i]), False
 
-    return i, True
+    return len(lista), True
 
 def listaFloat(lista,inicio=0,fin=-1):
 	flotantes=[]; 
@@ -43,7 +43,7 @@ def listaFloat(lista,inicio=0,fin=-1):
 			flotantes.append(float(lista[i]))
 
 	else:
-		for i in range(inicio,fin+1):
+		for i in range(inicio,fin):
 			flotantes.append(float(lista[i])); 
 
 	return flotantes
@@ -122,14 +122,14 @@ def MCNPacilindro(*param,tipo="rcc"):
 		if len(param) == 7:
 			centro=punto(param[0],param[1],param[2])
 			vec=vector(param[3],param[4],param[5])
-			r=param[6]
-
+			r=param[6];
+            
 			return poliedroConvexo.cilindro(centro, r, vec)
 
 	elif tipo == "c/x":
 		if len(param) == 3:
 			centro=punto(0,param[0],param[1])
-			vec=punto(100,0,0)
+			vec=vector(100,0,0)
 			r=param[2]
 
 			return poliedroConvexo.cilindro(centro, r, vec)
@@ -137,7 +137,7 @@ def MCNPacilindro(*param,tipo="rcc"):
 	elif tipo == "c/y":
 		if len(param) == 3:
 			centro=punto(param[0], 0, param[1])
-			vec=punto(0,100,0)
+			vec=vector(0,100,0)
 			r=param[2]
 
 			return poliedroConvexo.cilindro(centro, r, vec)
@@ -145,7 +145,7 @@ def MCNPacilindro(*param,tipo="rcc"):
 	elif tipo == "c/z":
 		if len(param) == 3:
 			centro=punto(param[0], param[1], 0)
-			vec=punto(0,0,100)
+			vec=vector(0,0,100)
 			r=param[2]
 
 			return poliedroConvexo.cilindro(centro, r, vec)
@@ -188,18 +188,28 @@ def MCNPacilindro(*param,tipo="rcc"):
 	else:
 		raise ValueError("El tipo ingresado no es compatible con los parametros ingresados ")
         
-def MCNPaLista(cadena):
+def MCNPGeomaLista(cadena):
     lista=cadena.split(" ")
     
     while "" in lista:
         lista.remove("")
-    
-    if "c" in lista[0]:
+        
+    if not lista:
         return False
     
-    else:    
+    elif "c" in lista[0]:
+        return False
+    
+    elif lista[0] == "mode":
+        return "romper"
+    
+    elif lista[1].isnumeric():
+        return False
+    
+    else:
         
         indice_dinero, _= verificarFloatLista(lista, 2)
+        #print(indice_dinero, _)
         lis=listaFloat(lista, inicio=2, fin= indice_dinero)
         num=int(lista[0])
         tipo=lista[1]
@@ -218,8 +228,16 @@ def lecturaMCNP(ruta_archivo):
         
         for linea in archivo:
             cont=0
+            linea=linea.strip()
+            #print(linea)
+            lec=MCNPGeomaLista(linea)
             
-            lec=MCNPaLista(linea)
+            #print(lec)
+            if not lec:
+                continue
+            
+            elif lec == "romper":
+                break
             
             if lec[1] not in geometrias:
                 print("Lo sentimos, geometria por implementar")
@@ -240,25 +258,53 @@ def lecturaMCNP(ruta_archivo):
                             
                     geom.append(lec)
                             
-                        
-
             else:
                 continue
             
+        return geom
+    
+def MCNPaGeom(con):
+    
+    figuras={"esferas":list(),"paralelepipedos":list(),"plano":list(),"cilindro":list()}
+    
+    for fig in con:
+        
+        print(fig)
+        
+        if fig[1][0] == "p":
+            
+            figuras["plano"].append(MCNPaPlano(*fig[2], tipo=fig[1]))
+            
+        elif fig[1][0] == "s":
+            figuras["esferas"].append(MCNPaEsfera(*fig[2], tipo=fig[1]))
+            
+        elif fig[1][0] == "c" or fig[1] == "rcc":
+            figuras["cilindro"].append(MCNPacilindro(*fig[2], tipo=fig[1]))
+            
+        elif fig[1] == "rpp":
+            continue
+            
+            
             
 if __name__=="__main__":
-    prueba="""    1       rpp -75 75 -75 75 -75 75 """
+    #prueba="""    1       rpp -75 75 -75 75 -75 75  
+    #2       rpp -75 75 -75 75 -75 75"""
 
-    flotantes=MCNPaLista(prueba)
+    #flotantes=MCNPaLista(prueba)
     
-    if flotantes:
+    #if flotantes:
         
-        print(flotantes)
+    #    print(flotantes)
         
-        print(flotantes[1] in geometrias)
+    #    print(flotantes[1][0])
         
-        print(flotantes[2])
-
+    #    print(flotantes[2])
+    
+    muchotexto=lecturaMCNP("rayosx2.txt")
+        
+    #print(muchotexto)
+    
+    geometria=MCNPaGeom(muchotexto)
 
 
 

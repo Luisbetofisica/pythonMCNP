@@ -3,7 +3,6 @@ import math
 
 import tkinter as tk
 #import MCNPpython
-
 from punto import punto
 from vector import vector
 #from plano import plano
@@ -11,121 +10,14 @@ from linea import linea
 #from poligonoConvexo import polignoConvexo
 from poliedroConvexo import poliedroConvexo
 from matrix import matrix
-
-from utilidades import FLOAT_EPS, geomRenderVertices2, geomRenderCaras
+from utilidades import geomRenderVertices2, geomRenderCaras
+from geometriaRender import geometria
 
 
 ############################################################################################################################################
 ################################################## Clase geometria para optimizar la creacion de formas, sus metodos etc ###################
 ############################################################################################################################################
 
-class geometria:
-    def __init__(self, canvas_width, canvas_height):
-        self.CANVAS_WIDTH = canvas_height
-        self.CANVAS_HEIGHT= canvas_height
-        self.POSICION_OBJ = [canvas_width // 2, canvas_height-20]
-        self.ESCALA_OBJ = 2500
-        self._angulo_x=0
-        self._angulo_y=0
-        self._angulo_z=0
-        self._zoom=30
-        self._caras=[]
-        self._vertices={}
-        self.LLENAR=""
-        self.COLOR_LINEA="#0000FF"
-        self.COLOR_PUNTO="#000000"
-
-    def cambiar_color_llenado(self, color, no_llenado=False):
-        if(no_llenado):
-            self.LLENAR=""
-        else:
-            self.LLENAR=color
-
-    def cambiar_color_linea(self, color):
-        self.COLOR_LINEA=color
-
-    def actualizar_posicion(self, x, y):
-        self.POSICION_OBJ[0]+=x
-        self.POSICION_OBJ[1]+=y
-
-    def _matriz_rotacion(self):
-        rot_x=matrix.rotx(self._angulo_x)
-        rot_y=matrix.roty(self._angulo_y)
-        rot_z=matrix.rotz(self._angulo_z)
-
-        return rot_x, rot_y, rot_z
-
-    def _transformar_2d(self,punto, rot_x, rot_y, rot_z):
-        rotado2d=rot_x*punto
-        rotado2d=rot_y*rotado2d
-        rotado2d=rot_z*rotado2d
-
-        z=0.5/(self._zoom-rotado2d[2][0])
-
-        matriz_proyeccion=matrix(2,3)
-        matriz_proyeccion[0][0]=z
-        matriz_proyeccion[1][1]=z
-
-        proyectado2d=matriz_proyeccion*rotado2d
-
-        x=int(proyectado2d[0][0]*self.ESCALA_OBJ)+self.POSICION_OBJ[0]
-        y=-int(proyectado2d[1][0]*self.ESCALA_OBJ)+self.POSICION_OBJ[1]
-
-        return x, y
-
-    def reiniciar_angulos(self):
-        self._angulo_x=0
-        self._angulo_y=0
-        self._angulo_z=0
-
-    def dibujar_punto(self, point, canvas):
-        POINT_SIZE=2
-        canvas.create_oval(point[0],point[1],point[0],point[1], width=POINT_SIZE, fill=self.COLOR_PUNTO)
-        return canvas
-
-    def dibujar_caras(self, canvas, puntos):
-
-        for cara in self._caras:
-            #print(puntos)
-            dibujar=[puntos[cara[i]] for i in range(len(cara))]
-            #print(dibujar)
-
-            for point in dibujar:
-                if point[0]<0 or point[1]<0 or point[0]> self.CANVAS_WIDTH or point[1]>self.CANVAS_HEIGHT:
-                    continue
-
-                canvas = self.dibujar_punto(point, canvas)
-
-            canvas.create_polygon(dibujar, outline= self.COLOR_LINEA, fill= self.LLENAR)
-
-        
-        return canvas
-
-    def dibujar_linea(self, canvas, puntos):
-
-        puntos_proyectados={}
-        rot_x, rot_y, rot_z =self._matriz_rotacion()
-        i=0
-
-        for point in puntos:
-            x,y=self._transformar_2d(point, rot_x, rot_y, rot_z)
-            puntos_proyectados[i]=[x,y]
-            i+=1
-
-        canvas.create_line(puntos_proyectados[0],puntos_proyectados[1])
-
-    def dibujar_objeto(self, canvas):
-        puntos_proyectados = {}
-
-        rot_x, rot_y, rot_z =self._matriz_rotacion()   
-        for vertice in self._vertices.items():
-            x, y = self._transformar_2d(vertice[1], rot_x, rot_y, rot_z)
-            puntos_proyectados[vertice[0]]=[x,y]
-
-        #print(puntos_proyectados[vertice[0]][1])
-        #
-        # print(puntos_proyectados)
-        return self.dibujar_caras(canvas, puntos_proyectados)
 
 
 class interfaz(tk.Tk):
@@ -136,7 +28,7 @@ class interfaz(tk.Tk):
     TAMAÑO_PASO=0.5
 
     FONDO="#0b0b0b"
-    figuras={"esferas":set(),"paralelepipedos":set(),"plano":set(),"cilindro":set()}
+    figuras={"esferas":list(),"paralelepipedos":list(),"plano":list(),"cilindro":list()}
 
     def __init__(self, titulo="MCNPython", tam_min=(1200,600)):
         super().__init__()
@@ -146,6 +38,7 @@ class interfaz(tk.Tk):
         self._iniciar_ventana(titulo, tam_min)
         self._crear_herramientas()
         self._reiniciar_rotacion()
+        self.bind("<Configure>", self._cambio_ventana)
 
     def _iniciar_ventana(self, titulo, tam):
         self.title(titulo)
@@ -177,7 +70,7 @@ class interfaz(tk.Tk):
     def _crear_herramienta_zoom(self):
         ttk.Label(self, text="Zoom", foreground="#FFFFFF", background="#131313").place(relx=self.X_REL, rely=0.052, relheight=0.035, relwidth=0.2, anchor="ne")
 
-        self.deslizante_zoom=ttk.Scale(self, from_=2000, to=0.1, orient="horizontal", command=self._cambio)
+        self.deslizante_zoom=ttk.Scale(self, from_=20, to=0.01, orient="horizontal", command=self._cambio)
         self.deslizante_zoom.set(self._manejo_geometria._zoom)
         self.deslizante_zoom.place(relx=self.X_REL, rely=0.01, relheight=0.04, relwidth=0.2, anchor="ne")
 
@@ -222,10 +115,11 @@ class interfaz(tk.Tk):
 
 
         if hash(esfera) not in hashes:
-            self.figuras["esferas"].add(esfera)
+            self.figuras["esferas"].append(esfera)
             #print("nueva figura")
             self._cambioFig()
             self._cambio()
+            
         #vertices=geomRenderVertices(esfera)
         #caras, vertices=geomRenderCaras(esfera, vertices)
 
@@ -257,7 +151,7 @@ class interfaz(tk.Tk):
             hashes.append(hash(i))
 
         if hash(cubo) not in hashes:
-            self.figuras["paralelepipedos"].add(cubo)
+            self.figuras["paralelepipedos"].append(cubo)
             self._cambioFig()
             self._cambio()
 
@@ -318,6 +212,10 @@ class interfaz(tk.Tk):
 
     def _obtener_zoom(self):
         self._manejo_geometria._zoom=self.deslizante_zoom.get()
+        
+    def _cambio_ventana(self, evento):
+        self._manejo_geometria.CANVAS_WIDTH=self.canvas.winfo_width()
+        self._manejo_geometria.CANVAS_HEIGHT==self.canvas.winfo_height()
 
     def dibujar(self):
         self._obtener_rotacion()
@@ -345,7 +243,8 @@ class main_():
         self._gui=interfaz()
 
     def _actualizarPantalla(self):
-        self._gui.dibujar()
-        self._gui.after(10, self._actualizarPantalla)
+        if self._gui:
+            self._gui.dibujar()
+            self._gui.after(10, self._actualizarPantalla)
 
 main_()

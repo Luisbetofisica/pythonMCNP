@@ -9,7 +9,7 @@ from poligonoConvexo import poligonoConvexo
 from punto import punto
 from plano import plano
 from vector import vector
-from utilidades import SIG_FIGURES, puntos_circulo, FLOAT_EPS
+from utilidades import SIG_FIGURES, puntos_circulo, FLOAT_EPS, verificaElementoinLista, verificaElementosLista
 import copy
 import math
 from seg_lin import seg_lin
@@ -105,12 +105,16 @@ class poliedroConvexo(object):
         circ_sup_puntos=puntos_circulo(centro=lim_sup,normal=vector_alt,radio=radio,n=n)
 
         lista_pgc=[circ_inf,circ_sup]
+        
+        #print(len(circ_sup_puntos))
 
         for i in range(len(circ_sup_puntos)):
             ini=i
             fin=(i+1)%len(circ_sup_puntos)
             lista_pgc.append(poligonoConvexo((circ_sup_puntos[ini],circ_sup_puntos[fin],circ_inf_puntos[fin],circ_inf_puntos[ini])))
-
+            
+                        
+            
         return cls(tuple(lista_pgc))
 
     def __init__(self, poli_conv, checar_convex=True):
@@ -118,13 +122,38 @@ class poliedroConvexo(object):
         self.con_puntos=set()
         self.con_segm=set()
         self.piram=set()
+        aux=[]
+        auxp=[]        
 
         for poli_convexo in self.poligonos_convexos:
+            
             for point in poli_convexo.puntos:
+                if not auxp:
+                    auxp.append(point)
+                    
+                elif not verificaElementoinLista(auxp, point):
+                    auxp.append(point)
+                    
+                
+            auxp=verificaElementosLista(auxp)
+                
+                
+            for point in auxp:
                 self.con_puntos.add(point)
 
             for segment in poli_convexo.segmentos():
+                
+                if not aux:
+                    aux.append(segment)
+                    
+                elif not verificaElementoinLista(aux, segment):
+                    aux.append(segment)
+                
+            aux=verificaElementosLista(aux)
+                
+            for segment in aux:
                 self.con_segm.add(segment)
+                
 
         self.punto_central=self.punto_central()
 
@@ -280,3 +309,11 @@ class poliedroConvexo(object):
 
     def __hash__(self):
         return hash(("poliedroConvexo", round(self._suma_poligonos_hash(),SIG_FIGURES),round(self._suma_puntos_hash(),SIG_FIGURES)))
+
+if __name__=="__main__":
+    poliedroConvexo.cilindro(punto(16, 0.0, 15.0), 7.1, vector(-15, 0.0, 0.0))
+    
+    lista=[punto(1,0,1),punto(1,0,0),punto(1,1,0)]
+    
+    if punto(1,0,1) in lista:
+        print(lista.index(punto(1,0,1)))

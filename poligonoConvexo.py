@@ -36,6 +36,7 @@ class poligonoConvexo(object):
     def __init__(self,pts,reverso=False,checar_convex=False):
         puntos=copy.deepcopy(pts)
         self.puntos=sorted(set(puntos),key=puntos.index)
+        #print(len(self.puntos))
         if len(puntos)<3:
             raise ValueError("La cantidad de puntos no es suficiente")
         if reverso:
