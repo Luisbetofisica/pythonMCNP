@@ -129,7 +129,7 @@ def MCNPacilindro(*param,tipo="rcc"):
 	elif tipo == "c/x":
 		if len(param) == 3:
 			centro=punto(0,param[0],param[1])
-			vec=vector(100,0,0)
+			vec=vector(100,0,0);centro.mover((1/2)*vec)
 			r=param[2]
 
 			return poliedroConvexo.cilindro(centro, r, vec)
@@ -137,15 +137,15 @@ def MCNPacilindro(*param,tipo="rcc"):
 	elif tipo == "c/y":
 		if len(param) == 3:
 			centro=punto(param[0], 0, param[1])
-			vec=vector(0,100,0)
+			vec=vector(0,100,0);centro.mover((1/2)*vec)
 			r=param[2]
 
 			return poliedroConvexo.cilindro(centro, r, vec)
 
 	elif tipo == "c/z":
 		if len(param) == 3:
-			centro=punto(param[0], param[1], 0)
-			vec=vector(0,0,100)
+			centro=punto(param[0], param[1], -50)
+			vec=vector(0,0,100);
 			r=param[2]
 
 			return poliedroConvexo.cilindro(centro, r, vec)
@@ -154,7 +154,7 @@ def MCNPacilindro(*param,tipo="rcc"):
 	elif tipo == "cx":
 		if len(param) == 1:
 			centro=punto(-100,0,0)
-			vec=punto(100,0,0)
+			vec=vector(100,0,0)
 			r=param[2]
 
 			return poliedroConvexo.cilindro(centro, r, vec)
@@ -162,7 +162,7 @@ def MCNPacilindro(*param,tipo="rcc"):
 	elif tipo == "cy":
 		if len(param) == 3:
 			centro=punto(0, -100, 0)
-			vec=punto(0,100,0)
+			vec=vector(0,100,0)
 			r=param[2]
 
 			return poliedroConvexo.cilindro(centro, r, vec)
@@ -170,7 +170,7 @@ def MCNPacilindro(*param,tipo="rcc"):
 	elif tipo == "cz":
 		if len(param) == 3:
 			centro=punto(0, 0, -100)
-			vec=punto(0,0,100)
+			vec=vector(0,0,100)
 			r=param[2]
 
 			return poliedroConvexo.cilindro(centro, r, vec)
@@ -187,6 +187,29 @@ def MCNPacilindro(*param,tipo="rcc"):
 
 	else:
 		raise ValueError("El tipo ingresado no es compatible con los parametros ingresados ")
+        
+def MCNPaParalelepipedo(*param, tipo="rpp"):
+    #print(tipo)
+    if tipo == "rpp":
+        #print(len(param))
+        if len(param) == 6:
+            base=punto(param[0],param[2],param[4])
+            vec1=vector( param[1] - param[0], 0, 0)
+            vec2=vector( 0, param[3] - param[2], 0)
+            vec3=vector( 0, 0, param[5]- param[4])
+            
+            return poliedroConvexo.paralelepipedo(base, vec1, vec2, vec3)
+        
+    elif tipo == "box":
+        if len(param) == 9:
+            alejar=100
+            base=punto(param[0],param[1],param[2])
+            vec1=vector( param[3], param[4], param[5])
+            vec2=vector( param[6], param[7], param[7])
+            vec3=(alejar/2)*vec1.pcruz(vec2)
+            base.mover(vec3)
+            
+            return poliedroConvexo.paralelepipedo(base, vec1, vec2, vec3)
         
 def MCNPGeomaLista(cadena):
     lista=cadena.split(" ")
@@ -240,6 +263,7 @@ def lecturaMCNP(ruta_archivo):
                 break
             
             if lec[1] not in geometrias:
+                #print(lec[1])
                 print("Lo sentimos, geometria por implementar")
                 continue
 
@@ -266,6 +290,7 @@ def lecturaMCNP(ruta_archivo):
 def MCNPaGeom(con):
     
     figuras={"esferas":list(),"paralelepipedos":list(),"plano":list(),"cilindro":list()}
+    figuras_num={"esferas":list(),"paralelepipedos":list(),"plano":list(),"cilindro":list()}
     
     for fig in con:
         
@@ -274,16 +299,21 @@ def MCNPaGeom(con):
         if fig[1][0] == "p":
             
             continue
+            figuras_num["plano"].append(fig[0])
             #figuras["plano"].append(MCNPaPlano(*fig[2], tipo=fig[1]))
             
         elif fig[1][0] == "s":
+            figuras_num["esferas"].append(fig[0])
             figuras["esferas"].append(MCNPaEsfera(*fig[2], tipo=fig[1]))
             
         elif fig[1][0] == "c" or fig[1] == "rcc":
+            figuras_num["cilindro"].append(fig[0])
             figuras["cilindro"].append(MCNPacilindro(*fig[2], tipo=fig[1]))
             
-        elif fig[1] == "rpp":
-            continue
+        elif fig[1] == "rpp" or fig[1] == "box":
+            #continue
+            figuras_num["paralelepipedos"].append(fig[0])
+            figuras["paralelepipedos"].append(MCNPaParalelepipedo(*fig[2], tipo=fig[1]))
         
     return figuras
             

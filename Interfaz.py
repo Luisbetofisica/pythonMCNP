@@ -2,6 +2,7 @@ from tkinter import ttk
 import math
 
 import tkinter as tk
+from tkinter import filedialog
 #import MCNPpython
 from punto import punto
 from vector import vector
@@ -26,7 +27,7 @@ class interfaz(tk.Tk):
     ALTURA_CANVAS=600
     COLOR_CANVAS="white"
     X_REL=0.97
-    TAMANO_PASO=0.5
+    TAMANO_PASO=1
 
     FONDO="#0b0b0b"
     figuras={"esferas":list(),"paralelepipedos":list(),"plano":list(),"cilindro":list()}
@@ -39,19 +40,50 @@ class interfaz(tk.Tk):
         self._iniciar_ventana(titulo, tam_min)
         self._crear_herramientas()
         self._reiniciar_rotacion()
-        self.bind("<C>", self._leer_archivo)
+        self._opciones_archivo()
+        #self.bind("<C>", self._leer_archivo)
         self.bind("<Configure>", self._cambio_ventana)
         self.bind("<Up>", self._mover_arriba)
         self.bind("<Down>", self._mover_abajo)
+        self.bind("<Right>", self._mover_derecha)
+        self.bind("<Left>", self._mover_izquierda)
+        self.archivo=""
+        
+    def _barra_menu(self):
+        self._barra_opciones=tk.Menu(self)
+        
+    def _opciones_archivo(self):
+        self._barra_menu()
+        
+        self.menu_archivos=tk.Menu(self._barra_opciones, tearoff=0)
+        self.menu_archivos.add_command(label="Abrir archivo", command=self._seleccionar_archivo)
+        self._barra_opciones.add_cascade(label="Archivo", menu=self.menu_archivos)
+        
+        self.config(menu=self._barra_opciones)
+        
+    def _seleccionar_archivo(self):
+        self.archivo=filedialog.askopenfilename()
+        if self.archivo:
+            self._leer_archivo("")
         
     def _mover_arriba(self, event):
         #self._manejo_geometria.POSICION_OBJ[0]+=self.TAMANO_PASO
-        self._manejo_geometria.POSICION_OBJ[1]+=self.TAMANO_PASO
+        self._manejo_geometria.POSICION_OBJ[1]-=self.TAMANO_PASO
         self._cambio()
         
     def _mover_abajo(self, event):
         #self._manejo_geometria.POSICION_OBJ[0]-=self.TAMANO_PASO
-        self._manejo_geometria.POSICION_OBJ[1]-=self.TAMANO_PASO
+        self._manejo_geometria.POSICION_OBJ[1]+=self.TAMANO_PASO
+        self._cambio()
+        
+    def _mover_derecha(self, event):
+        #self._manejo_geometria.POSICION_OBJ[0]+=self.TAMANO_PASO
+        self._manejo_geometria.POSICION_OBJ[0]+=self.TAMANO_PASO
+        self._cambio()
+        
+    def _mover_izquierda(self, event):
+        #self._manejo_geometria.POSICION_OBJ[0]-=self.TAMANO_PASO
+        self._manejo_geometria.POSICION_OBJ[0]-=self.TAMANO_PASO
         self._cambio()
 
     def _iniciar_ventana(self, titulo, tam):
@@ -189,14 +221,20 @@ class interfaz(tk.Tk):
         
     def _leer_archivo(self, evento):
         
-        geoms=MCNPaGeom(lecturaMCNP("rayosx2.txt"))
+        try:
+        
+            geoms=MCNPaGeom(lecturaMCNP(self.archivo))
+            self.figuras=geoms
+            self._cambioFig()
+            self._cambio()
+            
+        except:
+            print("No se pudo leer el archivo")
         
         #vertices={item: val.punto_arreglo() for item, val in enumerate(esfera.con_puntos)}
         #self._manejo_geometria._vertices= vertices
 
-        self.figuras=geoms
-        self._cambioFig()
-        self._cambio()
+        
 
     def _figurasRender(self):
         
@@ -206,6 +244,7 @@ class interfaz(tk.Tk):
             
             for geom in self.figuras:
                 for fig in self.figuras[geom]:
+                    
                     #print(hash(fig))
                     vertices=geomRenderVertices2(fig,vertices)
                     if not vertices:
