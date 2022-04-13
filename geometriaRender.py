@@ -16,7 +16,7 @@ class geometria:
         self._angulo_x=0
         self._angulo_y=0
         self._angulo_z=0
-        self._zoom=30
+        self._zoom=3
         self._caras=[]
         self._vertices={}
         self.LLENAR=""
@@ -47,8 +47,12 @@ class geometria:
         rotado2d=rot_x*punto
         rotado2d=rot_y*rotado2d
         rotado2d=rot_z*rotado2d
-
-        z=0.5/(self._zoom-rotado2d[2][0])
+        
+        try:
+            z=0.5/(self._zoom-rotado2d[2][0])
+            
+        except ZeroDivisionError:
+            z=0.00001
 
         matriz_proyeccion=matrix(2,3)
         matriz_proyeccion[0][0]=z

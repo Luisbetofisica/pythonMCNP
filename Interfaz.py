@@ -12,6 +12,7 @@ from poliedroConvexo import poliedroConvexo
 from matrix import matrix
 from utilidades import geomRenderVertices2, geomRenderCaras
 from geometriaRender import geometria
+from MCNPpython import lecturaMCNP, MCNPaGeom
 
 
 ############################################################################################################################################
@@ -25,7 +26,7 @@ class interfaz(tk.Tk):
     ALTURA_CANVAS=600
     COLOR_CANVAS="white"
     X_REL=0.97
-    TAMAÑO_PASO=0.5
+    TAMANO_PASO=0.5
 
     FONDO="#0b0b0b"
     figuras={"esferas":list(),"paralelepipedos":list(),"plano":list(),"cilindro":list()}
@@ -38,7 +39,20 @@ class interfaz(tk.Tk):
         self._iniciar_ventana(titulo, tam_min)
         self._crear_herramientas()
         self._reiniciar_rotacion()
+        self.bind("<C>", self._leer_archivo)
         self.bind("<Configure>", self._cambio_ventana)
+        self.bind("<Up>", self._mover_arriba)
+        self.bind("<Down>", self._mover_abajo)
+        
+    def _mover_arriba(self, event):
+        #self._manejo_geometria.POSICION_OBJ[0]+=self.TAMANO_PASO
+        self._manejo_geometria.POSICION_OBJ[1]+=self.TAMANO_PASO
+        self._cambio()
+        
+    def _mover_abajo(self, event):
+        #self._manejo_geometria.POSICION_OBJ[0]-=self.TAMANO_PASO
+        self._manejo_geometria.POSICION_OBJ[1]-=self.TAMANO_PASO
+        self._cambio()
 
     def _iniciar_ventana(self, titulo, tam):
         self.title(titulo)
@@ -70,7 +84,7 @@ class interfaz(tk.Tk):
     def _crear_herramienta_zoom(self):
         ttk.Label(self, text="Zoom", foreground="#FFFFFF", background="#131313").place(relx=self.X_REL, rely=0.052, relheight=0.035, relwidth=0.2, anchor="ne")
 
-        self.deslizante_zoom=ttk.Scale(self, from_=20, to=0.01, orient="horizontal", command=self._cambio)
+        self.deslizante_zoom=ttk.Scale(self, from_=0.01, to=10000, orient="horizontal", command=self._cambio)
         self.deslizante_zoom.set(self._manejo_geometria._zoom)
         self.deslizante_zoom.place(relx=self.X_REL, rely=0.01, relheight=0.04, relwidth=0.2, anchor="ne")
 
@@ -152,6 +166,7 @@ class interfaz(tk.Tk):
 
         if hash(cubo) not in hashes:
             self.figuras["paralelepipedos"].append(cubo)
+            print("figura creada")
             self._cambioFig()
             self._cambio()
 
@@ -171,15 +186,30 @@ class interfaz(tk.Tk):
         #self._manejo_geometria._caras=caras
         #self._cambioFig()
         #self._cambio()
+        
+    def _leer_archivo(self, evento):
+        
+        geoms=MCNPaGeom(lecturaMCNP("rayosx2.txt"))
+        
+        #vertices={item: val.punto_arreglo() for item, val in enumerate(esfera.con_puntos)}
+        #self._manejo_geometria._vertices= vertices
+
+        self.figuras=geoms
+        self._cambioFig()
+        self._cambio()
 
     def _figurasRender(self):
+        
         if self.cambioFig:
             caras=self._manejo_geometria._caras
             vertices=self._manejo_geometria._vertices
+            
             for geom in self.figuras:
                 for fig in self.figuras[geom]:
                     #print(hash(fig))
                     vertices=geomRenderVertices2(fig,vertices)
+                    if not vertices:
+                        continue
                     #print(vertices)
                     caras=geomRenderCaras(fig,vertices)[0]+caras
 

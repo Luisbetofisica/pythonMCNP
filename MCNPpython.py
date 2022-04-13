@@ -273,7 +273,8 @@ def MCNPaGeom(con):
         
         if fig[1][0] == "p":
             
-            figuras["plano"].append(MCNPaPlano(*fig[2], tipo=fig[1]))
+            continue
+            #figuras["plano"].append(MCNPaPlano(*fig[2], tipo=fig[1]))
             
         elif fig[1][0] == "s":
             figuras["esferas"].append(MCNPaEsfera(*fig[2], tipo=fig[1]))
@@ -283,6 +284,8 @@ def MCNPaGeom(con):
             
         elif fig[1] == "rpp":
             continue
+        
+    return figuras
             
             
             

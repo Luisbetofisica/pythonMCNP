@@ -67,6 +67,7 @@ def keyValue(dic,valor):
     return False
 
 def geomRenderVertices(poliedro):
+    
     vertices={item: val.punto_arreglo() for item, val in enumerate(poliedro.con_puntos)}
     #print(vertices)
     return vertices
