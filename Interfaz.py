@@ -16,12 +16,9 @@ from geometriaRender import geometria
 from MCNPpython import lecturaMCNP, MCNPaGeom
 from tkinter import messagebox
 
-
 ############################################################################################################################################
 ################################################## Clase geometria para optimizar la creacion de formas, sus metodos etc ###################
 ############################################################################################################################################
-
-
 
 class interfaz(tk.Tk):
     ANCHO_CANVAS=800
@@ -110,13 +107,13 @@ class interfaz(tk.Tk):
         self._crear_rotador_x()
         self._crear_rotador_y()
         self._crear_rotador_z()
-        #self._boton_crear_cubo()
-        #self._boton_crear_esfera()
         self._boton_reiniciar_rotacion()
         self._boton_generar_cubo()
-        self._boton_generar_poliedro()
+        self._boton_generar_plano()
         self._boton_generar_esfera()
         self._boton_generar_cilindro()
+        self._boton_generar_piramide()
+        self._boton_generar_dibujar()
 
     def _crear_lienzo(self):
         self.color_lienzo= tk.StringVar()
@@ -156,25 +153,25 @@ class interfaz(tk.Tk):
 
     def _boton_reiniciar_rotacion(self):
         ttk.Button(self, text="Reiniciar angulos", command=self._reiniciar_rotacion).place(relx=self.X_REL, rely=0.9, relheight=0.05, relwidth=0.2, anchor="ne")
-
-    def _boton_crear_esfera(self):
-        ttk.Button(self, text="Crear esfera", command=self._crear_esfera).place(relx=self.X_REL, rely=0.8, relheight=0.05, relwidth=0.2, anchor="ne")
-
-    def _boton_crear_cubo(self):
-        ttk.Button(self, text="Crear cubo", command=self._crear_cubo).place(relx=self.X_REL, rely=0.7, relheight=0.05, relwidth=0.2, anchor="ne")
-        
+  
     def _boton_generar_cubo(self):
         ttk.Button(self, text="Generar cubo", command=self._generar_cubo).place(relx=self.X_REL -.1, rely=0.6, relheight=0.05, relwidth=0.1, anchor="ne")
 
     def _boton_generar_esfera(self):
         ttk.Button(self, text="Generar esfera", command=self._generar_esfera).place(relx=self.X_REL -.1, rely=0.5, relheight=0.05, relwidth=0.1, anchor="ne")
 
-    def _boton_generar_poliedro(self):
-        ttk.Button(self, text="Generar poliedro", command=self._generar_poliedro).place(relx=self.X_REL, rely=0.6, relheight=0.05, relwidth=0.1, anchor="ne")
+    def _boton_generar_plano(self):
+        ttk.Button(self, text="Generar poliedro", command=self._generar_plano).place(relx=self.X_REL, rely=0.6, relheight=0.05, relwidth=0.1, anchor="ne")
 
     def _boton_generar_cilindro(self):
         ttk.Button(self, text="Generar cilindro", command=self._generar_cilindro).place(relx=self.X_REL, rely=0.5, relheight=0.05, relwidth=0.1, anchor="ne")
-        
+
+    def _boton_generar_piramide(self):
+        ttk.Button(self, text="Generar piramide", command=self._generar_cubo).place(relx=self.X_REL - 0.1, rely=0.7, relheight=0.05, relwidth=0.1, anchor="ne")        
+
+    def _boton_generar_dibujar(self):
+        ttk.Button(self, text="Generar dibujar", command=self._generar_dibujar).place(relx=self.X_REL, rely=0.7, relheight=0.05, relwidth=0.1, anchor="ne")        
+
     def _destruir_ventana_emergente(self):
         self.dialogo.destroy()
         interfaz.ventana-=1
@@ -192,7 +189,6 @@ class interfaz(tk.Tk):
 
         if hash(cilindro) not in hashes:
             self.figuras["cilindro"].append(cilindro)
-            #print("figura creada")
             self._cambioFig()
             self._cambio()
             
@@ -205,11 +201,10 @@ class interfaz(tk.Tk):
 
         if hash(cubo) not in hashes:
             self.figuras["paralelepipedos"].append(cubo)
-            #print("figura creada")
             self._cambioFig()
             self._cambio()
 
-    def _generar_esfera_param(self, R, X, Y, Z):
+    def _crear_esfera_param(self, R, X, Y, Z):
         esfera=poliedroConvexo.esfera(punto(X,Y,Z),R)
         
         hashes=[]
@@ -221,17 +216,61 @@ class interfaz(tk.Tk):
             self._cambioFig()
             self._cambio()
 
+    def _crear_plano_param(self, x1, x2, x3, y1, y2, y3):
+        plano=poliedroConvexo.paralelepipedo(punto(0,0,0),vector(x1,x2,x3),vector(y1,y2,y3),vector(y1,y2,y3))
+        
+        hashes=[]
+        for i in self.figuras["paralelepipedos"]:
+            hashes.append(hash(i))
+
+        if hash(cubo) not in hashes:
+            self.figuras["paralelepipedos"].append(plano)
+            self._cambioFig()
+            self._cambio()
+
+    def _crear_piramide_param(self, R, X, Y, Z):
+        esfera=poliedroConvexo.esfera(punto(X,Y,Z),R)
+        
+        hashes=[]
+        for i in self.figuras["esferas"]:
+            hashes.append(hash(i))
+
+        if hash(esfera) not in hashes:
+            self.figuras["esferas"].append(esfera)
+            self._cambioFig()
+            self._cambio()
+
+    def _crear_linea_param(self, x1, x2, x3, y1, y2, y3):
+        linea=poliedroConvexo.paralelepipedo(punto(x1,x2,x3),vector(y1,y2,y3),vector(y1,y2,y3),vector(y1,y2,y3))
+        
+        hashes=[]
+        for i in self.figuras["paralelepipedos"]:
+            hashes.append(hash(i))
+
+        if hash(cubo) not in hashes:
+            self.figuras["paralelepipedos"].append(linea)
+            self._cambioFig()
+            self._cambio()
+    
+    def _crear_punto_param(self, X, Y, Z):
+        punto=poliedroConvexo.esfera(punto(X,Y,Z), 0)
+        
+        hashes=[]
+        for i in self.figuras["esferas"]:
+            hashes.append(hash(i))
+
+        if hash(esfera) not in hashes:
+            self.figuras["esferas"].append(punto)
+            self._cambioFig()
+            self._cambio()
+              
     def _generar_cubo(self):
         
         if interfaz.ventana <1:
     
             self.dialogo = tk.Toplevel()
             
-            # Incrementa en 1 el contador de ventanas
-            
             interfaz.ventana+=1
-            
-            # Recalcula posición de la ventana
             
             interfaz.posx_y += 50
             tamypos = '200x100+'+str(interfaz.posx_y)+ \
@@ -239,22 +278,13 @@ class interfaz(tk.Tk):
             self.dialogo.geometry(tamypos)
             self.dialogo.resizable(50,50)
             self.dialogo.minsize(400, 500)
-            # Obtiene identicador de la nueva ventana 
             
             ident = self.dialogo.winfo_id()
-            
-            # Construye mensaje de la barra de título
             
             titulo = str(interfaz.ventana)+": "+str(ident)
             self.dialogo.title(titulo)
             
-            # Define el botón 'Cerrar' que cuando sea
-            # presionado cerrará (destruirá) la ventana 
-            # 'self.dialogo' llamando al método
-            # 'self.dialogo.destroy'
-            
-            boton = ttk.Button(self.dialogo, text='CERRAR', 
-                               command=self._destruir_ventana_emergente)   
+            boton = ttk.Button(self.dialogo, text='CERRAR', command=self._destruir_ventana_emergente)   
             boton.pack(side=tk.BOTTOM, padx=20, pady=20)
     
             def Cubog():
@@ -273,12 +303,12 @@ class interfaz(tk.Tk):
             l2 = tk.Label(self.dialogo, text = "Posición en x")
             l3 = tk.Label(self.dialogo, text = "Posición en y")
             l4 = tk.Label(self.dialogo, text = "Posición en z")
-            inputtxt1 = tk.Text(self.dialogo, height = 3, width = 25, bg = "light yellow")
-            inputtxt2 = tk.Text(self.dialogo, height = 3, width = 25, bg = "light yellow")
-            inputtxt3 = tk.Text(self.dialogo, height = 3, width = 25, bg = "light yellow")
-            inputtxt4 = tk.Text(self.dialogo, height = 3, width = 25, bg = "light yellow")
+            inputtxt1 = tk.Text(self.dialogo, height = 2, width = 25, bg = "light yellow")
+            inputtxt2 = tk.Text(self.dialogo, height = 2, width = 25, bg = "light yellow")
+            inputtxt3 = tk.Text(self.dialogo, height = 2, width = 25, bg = "light yellow")
+            inputtxt4 = tk.Text(self.dialogo, height = 2, width = 25, bg = "light yellow")
      
-            Output = tk.Text(self.dialogo, height = 3, width = 25, bg = "light cyan")
+            Output = tk.Text(self.dialogo, height = 2, width = 25, bg = "light cyan")
      
             Display = tk.Button(self.dialogo, height = 2, width = 20, text ="CREAR", command = lambda:Cubog())
      
@@ -299,101 +329,13 @@ class interfaz(tk.Tk):
         else:
             print("Por favor cierre la otra ventana emergente")
 
-    def _generar_piramide(self):
-        
-        if interfaz.ventana<1:
-    
-            self.dialogo = tk.Toplevel()
-            
-            # Incrementa en 1 el contador de ventanas
-            
-            interfaz.ventana+=1
-            
-            # Recalcula posición de la ventana
-            
-            interfaz.posx_y += 50
-            tamypos = '200x100+'+str(interfaz.posx_y)+ \
-                      '+'+ str(interfaz.posx_y)
-            self.dialogo.geometry(tamypos)
-            self.dialogo.resizable(50,50)
-            self.dialogo.minsize(400, 500)
-            # Obtiene identicador de la nueva ventana 
-            
-            ident = self.dialogo.winfo_id()
-            
-            # Construye mensaje de la barra de título
-            
-            titulo = str(interfaz.ventana)+": "+str(ident)
-            self.dialogo.title(titulo)
-            
-            # Define el botón 'Cerrar' que cuando sea
-            # presionado cerrará (destruirá) la ventana 
-            # 'self.dialogo' llamando al método
-            # 'self.dialogo.destroy'
-            
-            boton = ttk.Button(self.dialogo, text='CERRAR', 
-                               command=self._destruir_ventana_emergente)   
-            boton.pack(side=tk.BOTTOM, padx=20, pady=20)
-    
-            def Pirg():
-                lados = float(inputtxt1.get("1.0", "end-1c"))
-                tam = float(inputtxt5.get("1.0", "end-1c"))
-                posx = float(inputtxt2.get("1.0", "end-1c"))
-                posy = float(inputtxt3.get("1.0", "end-1c"))
-                posz = float(inputtxt4.get("1.0", "end-1c"))
-                if(tam < 0):
-                    Output.insert(tk.END, "ERROR EN CAPTURA DE DATOS!!!")
-                else:
-                    Output.insert(tk.END, 'Captura de datos correcta')
-         
-            l = tk.Label(self.dialogo, text = "AUN NO ESTA ESTA OPCIÓN")
-            l1 = tk.Label(self.dialogo, text = "Número de lados")
-            l2 = tk.Label(self.dialogo, text = "Posición x")
-            l3 = tk.Label(self.dialogo, text = "Posición y")
-            l4 = tk.Label(self.dialogo, text = "Posición y")
-            l5 = tk.Label(self.dialogo, text = "Tamaño")
-            inputtxt1 = tk.Text(self.dialogo, height = 3, width = 25, bg = "light yellow")
-            inputtxt2 = tk.Text(self.dialogo, height = 3, width = 25, bg = "light yellow")
-            inputtxt3 = tk.Text(self.dialogo, height = 3, width = 25, bg = "light yellow")
-            inputtxt4 = tk.Text(self.dialogo, height = 3, width = 25, bg = "light yellow")
-            inputtxt5 = tk.Text(self.dialogo, height = 3, width = 25, bg = "light yellow")
-     
-            Output = tk.Text(self.dialogo, height = 3, width = 25, bg = "light cyan")
-     
-            Display = tk.Button(self.dialogo, height = 2, width = 20, text ="CREAR", command = lambda:Pirg())
-     
-            l.pack()
-            l1.pack()
-            inputtxt1.pack()
-            l2.pack()
-            inputtxt2.pack()
-            l3.pack()
-            inputtxt3.pack()
-            l4.pack()
-            inputtxt4.pack()
-            l5.pack()
-            inputtxt5.pack()
-            Display.pack()
-            Output.pack()
-            
-            self.dialogo.protocol("WM_DELETE_WINDOW", self._cerrado_tacha)
-            
-        else:
-            print("Por favor cierre la otra ventana emergente")
-            
-        
     def _generar_esfera(self):
         
         if interfaz.ventana<1:
                 
-    
             self.dialogo = tk.Toplevel()
             
-            # Incrementa en 1 el contador de ventanas
-            
             interfaz.ventana+=1
-            
-            # Recalcula posición de la ventana
             
             interfaz.posx_y += 50
             tamypos = '200x100+'+str(interfaz.posx_y)+ \
@@ -401,22 +343,13 @@ class interfaz(tk.Tk):
             self.dialogo.geometry(tamypos)
             self.dialogo.resizable(50,50)
             self.dialogo.minsize(400, 500)
-            # Obtiene identicador de la nueva ventana 
             
             ident = self.dialogo.winfo_id()
-            
-            # Construye mensaje de la barra de título
             
             titulo = str(interfaz.ventana)+": "+str(ident)
             self.dialogo.title(titulo)
             
-            # Define el botón 'Cerrar' que cuando sea
-            # presionado cerrará (destruirá) la ventana 
-            # 'self.dialogo' llamando al método
-            # 'self.dialogo.destroy'
-            
-            boton = ttk.Button(self.dialogo, text='CERRAR',
-                               command=self._destruir_ventana_emergente)   
+            boton = ttk.Button(self.dialogo, text='CERRAR', command=self._destruir_ventana_emergente)   
             boton.pack(side=tk.BOTTOM, padx=20, pady=20)
 
             def Esfeg():
@@ -435,12 +368,12 @@ class interfaz(tk.Tk):
             l2 = tk.Label(self.dialogo, text = "Posición x")
             l3 = tk.Label(self.dialogo, text = "Posición y")
             l4 = tk.Label(self.dialogo, text = "Posicion z")
-            inputtxt1 = tk.Text(self.dialogo, height = 3, width = 25, bg = "light yellow")
-            inputtxt2 = tk.Text(self.dialogo, height = 3, width = 25, bg = "light yellow")
-            inputtxt3 = tk.Text(self.dialogo, height = 3, width = 25, bg = "light yellow")
-            inputtxt4 = tk.Text(self.dialogo, height = 3, width = 25, bg = "light yellow")
+            inputtxt1 = tk.Text(self.dialogo, height = 2, width = 25, bg = "light yellow")
+            inputtxt2 = tk.Text(self.dialogo, height = 2, width = 25, bg = "light yellow")
+            inputtxt3 = tk.Text(self.dialogo, height = 2, width = 25, bg = "light yellow")
+            inputtxt4 = tk.Text(self.dialogo, height = 2, width = 25, bg = "light yellow")
      
-            Output = tk.Text(self.dialogo, height = 3, width = 25, bg = "light cyan")
+            Output = tk.Text(self.dialogo, height = 2, width = 25, bg = "light cyan")
      
             Display = tk.Button(self.dialogo, height = 2, width = 20, text ="CREAR", command = lambda:Esfeg())
      
@@ -459,6 +392,230 @@ class interfaz(tk.Tk):
             self.dialogo.protocol("WM_DELETE_WINDOW", self._cerrado_tacha)
             
         else:
+            print("Por favor cierre la otra ventana emergente")   
+
+    def _generar_plano(self):
+        
+        if interfaz.ventana<1:
+    
+            self.dialogo = tk.Toplevel()
+            
+            interfaz.ventana+=1
+            
+            interfaz.posx_y += 50
+            tamypos = '200x100+'+str(interfaz.posx_y)+ \
+                      '+'+ str(interfaz.posx_y)
+            self.dialogo.geometry(tamypos)
+            self.dialogo.resizable(50,50)
+            self.dialogo.minsize(400, 500)
+            
+            ident = self.dialogo.winfo_id()
+            
+            titulo = str(interfaz.ventana)+": "+str(ident)
+            self.dialogo.title(titulo)
+            
+            boton = ttk.Button(self.dialogo, text='CERRAR', command=self._destruir_ventana_emergente)   
+            boton.pack(side=tk.BOTTOM, padx=20, pady=20)
+    
+            def Plag():
+                X1 = float(inputtxt1.get("1.0", "end-1c"))
+                X2 = float(inputtxt2.get("1.0", "end-1c"))
+                X3 = float(inputtxt3.get("1.0", "end-1c"))
+                Y1 = float(inputtxt4.get("1.0", "end-1c"))
+                Y2 = float(inputtxt5.get("1.0", "end-1c"))
+                Y3 = float(inputtxt6.get("1.0", "end-1c"))
+                if(punto(X1,X2,X3) == punto(0,0,0)):
+                    Output.insert(tk.END, "ERROR EN CAPTURA DE DATOS!!!")
+                elif(punto(Y1,Y2,Y3) == punto(0,0,0)):
+                    Output.insert(tk.END, "ERROR EN CAPTURA DE DATOS!!!")
+                else:
+                    Output.insert(tk.END, 'Captura de datos correcta')
+                    self._crear_plano_param(X1, X2, X3, Y1, Y2, Y3)
+                     
+            l = tk.Label(self.dialogo, text = "GENERADOR DE PLANOS")
+            l1 = tk.Label(self.dialogo, text = "X_1")
+            l2 = tk.Label(self.dialogo, text = "X_2")
+            l3 = tk.Label(self.dialogo, text = "X_3")
+            l4 = tk.Label(self.dialogo, text = "Y_1")
+            l5 = tk.Label(self.dialogo, text = "Y_2")
+            l6 = tk.Label(self.dialogo, text = "Y_3")            
+            inputtxt1 = tk.Text(self.dialogo, height = 2, width = 25, bg = "light yellow")
+            inputtxt2 = tk.Text(self.dialogo, height = 2, width = 25, bg = "light yellow")
+            inputtxt3 = tk.Text(self.dialogo, height = 2, width = 25, bg = "light yellow")
+            inputtxt4 = tk.Text(self.dialogo, height = 2, width = 25, bg = "light yellow")
+            inputtxt5 = tk.Text(self.dialogo, height = 2, width = 25, bg = "light yellow")
+            inputtxt6 = tk.Text(self.dialogo, height = 2, width = 25, bg = "light yellow")
+     
+            Output = tk.Text(self.dialogo, height = 2, width = 25, bg = "light cyan")
+     
+            Display = tk.Button(self.dialogo, height = 2, width = 20, text ="CREAR", command = lambda:Plag())
+     
+            l.pack()
+            l1.pack()
+            inputtxt1.pack()
+            l2.pack()
+            inputtxt2.pack()
+            l3.pack()
+            inputtxt3.pack()
+            l4.pack()
+            inputtxt4.pack()
+            l5.pack()
+            inputtxt5.pack()
+            l6.pack()
+            inputtxt6.pack()
+            Display.pack()
+            Output.pack()
+            
+            self.dialogo.protocol("WM_DELETE_WINDOW", self._cerrado_tacha)
+            
+        else:
+            print("Por favor cierre la otra ventana emergente")
+    
+    def _generar_piramide(self):
+        
+        if interfaz.ventana <1:
+    
+            self.dialogo = tk.Toplevel()
+            
+            interfaz.ventana+=1
+            
+            interfaz.posx_y += 50
+            tamypos = '200x100+'+str(interfaz.posx_y)+ \
+                      '+'+ str(interfaz.posx_y)
+            self.dialogo.geometry(tamypos)
+            self.dialogo.resizable(50,50)
+            self.dialogo.minsize(400, 500)
+            
+            ident = self.dialogo.winfo_id()
+            
+            titulo = str(interfaz.ventana)+": "+str(ident)
+            self.dialogo.title(titulo)
+            
+            boton = ttk.Button(self.dialogo, text='CERRAR', command=self._destruir_ventana_emergente)   
+            boton.pack(side=tk.BOTTOM, padx=20, pady=20)
+    
+            def Cubog():
+                base = float(inputtxt1.get("1.0", "end-1c"))
+                posx = float(inputtxt2.get("1.0", "end-1c"))
+                posy = float(inputtxt3.get("1.0", "end-1c"))
+                posz = float(inputtxt4.get("1.0", "end-1c"))
+                self._crear_cubo_param(base, posx, posy, posz)
+                if(base < 0):
+                    Output.insert(tk.END, "ERROR EN CAPTURA DE DATOS!!!")
+                else:
+                    Output.insert(tk.END, 'Captura de datos correcta')
+         
+            l = tk.Label(self.dialogo, text = "GENERADOR DE PARALELEPIPEDOS")
+            l1 = tk.Label(self.dialogo, text = "Base")
+            l2 = tk.Label(self.dialogo, text = "Posición en x")
+            l3 = tk.Label(self.dialogo, text = "Posición en y")
+            l4 = tk.Label(self.dialogo, text = "Posición en z")
+            inputtxt1 = tk.Text(self.dialogo, height = 2, width = 25, bg = "light yellow")
+            inputtxt2 = tk.Text(self.dialogo, height = 2, width = 25, bg = "light yellow")
+            inputtxt3 = tk.Text(self.dialogo, height = 2, width = 25, bg = "light yellow")
+            inputtxt4 = tk.Text(self.dialogo, height = 2, width = 25, bg = "light yellow")
+     
+            Output = tk.Text(self.dialogo, height = 2, width = 25, bg = "light cyan")
+     
+            Display = tk.Button(self.dialogo, height = 2, width = 20, text ="CREAR", command = lambda:Cubog())
+     
+            l.pack()
+            l1.pack()
+            inputtxt1.pack()
+            l2.pack()
+            inputtxt2.pack()
+            l3.pack()
+            inputtxt3.pack()
+            l4.pack()
+            inputtxt4.pack()
+            Display.pack()
+            Output.pack()
+            
+            self.dialogo.protocol("WM_DELETE_WINDOW", self._cerrado_tacha)
+            
+        else:
+            print("Por favor cierre la otra ventana emergente")
+        
+    def _generar_dibujar(self):
+        
+        if interfaz.ventana<1:
+    
+            self.dialogo = tk.Toplevel()
+            
+            interfaz.ventana+=1
+            
+            interfaz.posx_y += 50
+            tamypos = '200x100+'+str(interfaz.posx_y)+ \
+                      '+'+ str(interfaz.posx_y)
+            self.dialogo.geometry(tamypos)
+            self.dialogo.resizable(50,50)
+            self.dialogo.minsize(400, 600)
+            
+            ident = self.dialogo.winfo_id()
+            
+            titulo = str(interfaz.ventana)+": "+str(ident)
+            self.dialogo.title(titulo)
+            
+            boton = ttk.Button(self.dialogo, text='CERRAR', command=self._destruir_ventana_emergente)   
+            boton.pack(side=tk.BOTTOM, padx=20, pady=20)
+
+            def Pung():
+                x1 = float(inputtxt1.get("1.0", "end-1c"))
+                x2 = float(inputtxt2.get("1.0", "end-1c"))
+                x3 = float(inputtxt3.get("1.0", "end-1c"))
+                Output.insert(tk.END, 'Captura de datos correcta')
+                self._crear_punto_param(x1,x2,x3)
+
+            def Ling():
+                x1 = float(inputtxt1.get("1.0", "end-1c"))
+                x2 = float(inputtxt2.get("1.0", "end-1c"))
+                x3 = float(inputtxt3.get("1.0", "end-1c"))
+                y1 = float(inputtxt4.get("1.0", "end-1c"))
+                y2 = float(inputtxt5.get("1.0", "end-1c"))
+                y3 = float(inputtxt6.get("1.0", "end-1c"))
+                Output.insert(tk.END, 'Captura de datos correcta')
+                self._crear_punto_param(x1,x2,x3,y1,y2,y3)
+                    
+            l = tk.Label(self.dialogo, text = "DIBUJA PUNTOS Y LINEAS")
+            l1 = tk.Label(self.dialogo, text = "X1")
+            l2 = tk.Label(self.dialogo, text = "X2")
+            l3 = tk.Label(self.dialogo, text = "X3")
+            l4 = tk.Label(self.dialogo, text = "Y1")
+            l5 = tk.Label(self.dialogo, text = "Y2")
+            l6 = tk.Label(self.dialogo, text = "Y3")
+        
+            inputtxt1 = tk.Text(self.dialogo, height = 2, width = 25, bg = "light yellow")
+            inputtxt2 = tk.Text(self.dialogo, height = 2, width = 25, bg = "light yellow")
+            inputtxt3 = tk.Text(self.dialogo, height = 2, width = 25, bg = "light yellow")
+            inputtxt4 = tk.Text(self.dialogo, height = 2, width = 25, bg = "light yellow")
+            inputtxt5 = tk.Text(self.dialogo, height = 2, width = 25, bg = "light yellow")
+            inputtxt6 = tk.Text(self.dialogo, height = 2, width = 25, bg = "light yellow")
+     
+            Output = tk.Text(self.dialogo, height = 2, width = 25, bg = "light cyan")
+     
+            Display1 = tk.Button(self.dialogo, height = 2, width = 20, text ="CREAR PUNTO", command = lambda:Pung())
+            Display2 = tk.Button(self.dialogo, height = 2, width = 20, text ="CREAR LINEA", command = lambda:Ling())
+     
+            l.pack()
+            l1.pack()
+            inputtxt1.pack()
+            l2.pack()
+            inputtxt2.pack()
+            l3.pack()
+            inputtxt3.pack()
+            Display1.pack()
+            l4.pack()
+            inputtxt4.pack()
+            l5.pack()
+            inputtxt5.pack()
+            l6.pack()
+            inputtxt6.pack()
+            Display2.pack()
+            Output.pack()
+            
+            self.dialogo.protocol("WM_DELETE_WINDOW", self._cerrado_tacha)
+            
+        else:
             print("Por favor cierre la otra ventana emergente")
             
     def _generar_cilindro(self):
@@ -467,11 +624,7 @@ class interfaz(tk.Tk):
     
             self.dialogo = tk.Toplevel()
             
-            # Incrementa en 1 el contador de ventanas
-            
             interfaz.ventana+=1
-            
-            # Recalcula posición de la ventana
             
             interfaz.posx_y += 50
             tamypos = '200x100+'+str(interfaz.posx_y)+ \
@@ -479,22 +632,13 @@ class interfaz(tk.Tk):
             self.dialogo.geometry(tamypos)
             self.dialogo.resizable(50,50)
             self.dialogo.minsize(400, 550)
-            # Obtiene identicador de la nueva ventana 
             
             ident = self.dialogo.winfo_id()
-            
-            # Construye mensaje de la barra de título
             
             titulo = str(interfaz.ventana)+": "+str(ident)
             self.dialogo.title(titulo)
             
-            # Define el botón 'Cerrar' que cuando sea
-            # presionado cerrará (destruirá) la ventana 
-            # 'self.dialogo' llamando al método
-            # 'self.dialogo.destroy'
-            
-            boton = ttk.Button(self.dialogo, text='CERRAR', 
-                               command=self._destruir_ventana_emergente)   
+            boton = ttk.Button(self.dialogo, text='CERRAR', command=self._destruir_ventana_emergente)   
             boton.pack(side=tk.BOTTOM, padx=20, pady=20)
     
             def Cilg():
@@ -515,13 +659,13 @@ class interfaz(tk.Tk):
             l3 = tk.Label(self.dialogo, text = "Posición y")
             l4 = tk.Label(self.dialogo, text = "Posicion z")
             l5 = tk.Label(self.dialogo, text = "Radio")
-            inputtxt1 = tk.Text(self.dialogo, height = 3, width = 25, bg = "light yellow")
-            inputtxt2 = tk.Text(self.dialogo, height = 3, width = 25, bg = "light yellow")
-            inputtxt3 = tk.Text(self.dialogo, height = 3, width = 25, bg = "light yellow")
-            inputtxt4 = tk.Text(self.dialogo, height = 3, width = 25, bg = "light yellow")
-            inputtxt5 = tk.Text(self.dialogo, height = 3, width = 25, bg = "light yellow")
+            inputtxt1 = tk.Text(self.dialogo, height = 2, width = 25, bg = "light yellow")
+            inputtxt2 = tk.Text(self.dialogo, height = 2, width = 25, bg = "light yellow")
+            inputtxt3 = tk.Text(self.dialogo, height = 2, width = 25, bg = "light yellow")
+            inputtxt4 = tk.Text(self.dialogo, height = 2, width = 25, bg = "light yellow")
+            inputtxt5 = tk.Text(self.dialogo, height = 2, width = 25, bg = "light yellow")
      
-            Output = tk.Text(self.dialogo, height = 3, width = 25, bg = "light cyan")
+            Output = tk.Text(self.dialogo, height = 2, width = 25, bg = "light cyan")
      
             Display = tk.Button(self.dialogo, height = 2, width = 20, text ="CREAR", command = lambda:Cilg())
      
@@ -543,14 +687,10 @@ class interfaz(tk.Tk):
             
         else:
             print("Por favor cierre la otra ventana emergente")
-
-        
-
         
     def _leer_archivo(self, evento):
         
-        try:
-        
+        try:        
             geoms=MCNPaGeom(lecturaMCNP(self.archivo))
             self.figuras=geoms
             self._cambioFig()
@@ -561,8 +701,6 @@ class interfaz(tk.Tk):
         
         #vertices={item: val.punto_arreglo() for item, val in enumerate(esfera.con_puntos)}
         #self._manejo_geometria._vertices= vertices
-
-        
 
     def _figurasRender(self):
         
@@ -585,8 +723,6 @@ class interfaz(tk.Tk):
 
             self._manejo_geometria._caras=caras
             self._manejo_geometria._vertices=vertices
-
-
 
     def _cambio(self,*arg):
         self.cambio=True
@@ -627,8 +763,6 @@ class interfaz(tk.Tk):
             self.canvas.delete("all")
             self.canvas=self._manejo_geometria.dibujar_objeto(self.canvas)
             self.cambio=False
-
-
 
 class main_():
     def __init__(self):
